@@ -1,0 +1,35 @@
+{
+  "name": "crisisflow-backend",
+  "version": "1.0.0",
+  "description": "CrisisFlow AI — backend API skeleton for the coordination agent",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "agentverse:metadata": "node scripts/agentverse-register.js",
+    "test": "node tests/coordination.service.test.js && node tests/maps.service.test.js && node tests/asiOne.service.test.js && node tests/asiPlanner.service.test.js && node tests/sse.stream.test.js && node tests/crisisflow.agent.test.js && node tests/agentverse.bridge.test.js",
+    "syntax:check": "node --check src/server.js && node --check src/controllers/ai.controller.js && node --check src/services/asiPlanner.service.js && node --check src/agents/crisisflow/crisisflow.agent.js && node --check src/agents/crisisflow/crisisflow.handler.js && node --check src/agents/crisisflow/crisisflow.manifest.js && node --check src/utils/acp.js && node --check src/agentverse/chatProtocol.js && node --check src/agentverse/crisisflow.bridge.js && node --check scripts/agentverse-register.js"
+  },
+  "keywords": [
+    "crisisflow",
+    "ai",
+    "coordination",
+    "express",
+    "mongodb"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-rate-limit": "^7.4.1",
+    "helmet": "^8.0.0",
+    "mongoose": "^8.8.3",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.2.0",
+    "nodemon": "^3.1.7"
+  }
+}

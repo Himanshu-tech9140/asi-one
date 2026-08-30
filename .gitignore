@@ -1,0 +1,14 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+npm-debug.log*
+.env
+backend/.env
+
+# Backend
+backend/node_modules
+backend/dist
+backend/build
+*.log
