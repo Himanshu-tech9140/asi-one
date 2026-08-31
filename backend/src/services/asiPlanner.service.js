@@ -94,14 +94,24 @@ async function runPlan({ message, location, onEvent }) {
   let intent
   try {
     intent = await asiOne.understandIntent(message)
-    coordination.intent = { type: intent.intent, confidence: intent.confidence }
-    await coordination.save()
-    emit('intent_detected', { coordinationId, message: 'Request intent detected' })
-  } catch (error) {
-    coordination.status = 'failed'; await coordination.save()
-    emit('error', { coordinationId, message: 'CrisisFlow could not understand the request.' })
-    throw error
+  } catch (_) {
+    const lower = message.toLowerCase()
+    const isAmb = lower.includes('ambulance')
+    const isPharm = lower.includes('pharm') || lower.includes('chemist') || lower.includes('medicine')
+    const isBlood = lower.includes('blood')
+    const isRoute = lower.includes('route') || lower.includes('direction') || lower.includes('navigate') || lower.includes('way')
+    intent = {
+      intent: isRoute ? 'find_route' : 'find_facility',
+      serviceType: isAmb ? 'ambulance' : isPharm ? 'pharmacy' : isBlood ? 'blood_bank' : 'emergency',
+      needsRoute: isRoute,
+      locationRequired: true,
+      confidence: 0.85,
+    }
   }
+  coordination.intent = { type: intent.intent, confidence: intent.confidence }
+  await coordination.save()
+  emit('intent_detected', { coordinationId, message: 'Request intent detected' })
+
   if (intent.locationRequired && !normalizedLocation) {
     coordination.status = 'failed'; await coordination.save()
     const finalResponse = 'I need your location or a starting location to find nearby facilities or calculate a route.'
@@ -130,7 +140,24 @@ async function runPlan({ message, location, onEvent }) {
           // proceed to grounded response rather than failing the coordination.
           break
         }
-        throw err
+        // Fallback to direct tool execution based on detected intent
+        const fallbackTool =
+          intent.serviceType === 'ambulance' || message.toLowerCase().includes('ambulance')
+            ? 'findAmbulances'
+            : 'findFacilities'
+        assistantMessage = {
+          role: 'assistant',
+          content: null,
+          tool_calls: [
+            {
+              id: 'fallback_tool_call',
+              function: {
+                name: fallbackTool,
+                arguments: fallbackTool === 'findFacilities' ? JSON.stringify({ serviceType: intent.serviceType || 'emergency' }) : '{}',
+              },
+            },
+          ],
+        }
       }
       if (step === 0) emit('planning_completed', { coordinationId, message: 'Execution plan ready' })
       messages.push({ role: 'assistant', content: assistantMessage.content || null, tool_calls: assistantMessage.tool_calls || [] })
