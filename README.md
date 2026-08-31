@@ -27,6 +27,7 @@
 - [API Overview](#-api-overview)
 - [Deployment](#-deployment-render)
 - [Testing](#-testing)
+- [Snapshots](#-snapshots)
 - [Security](#-security)
 - [Roadmap](#-roadmap)
 
@@ -297,6 +298,16 @@ npm test
 ```
 
 Uses `mongodb-memory-server` and stubbed providers — zero API quota consumed.
+
+---
+
+## 📸 Snapshots
+
+<img width="1904" height="862" alt="ASI:One Dashboard" src="https://github.com/user-attachments/assets/828bcf94-06bd-431d-9da9-850dc51abadb" />
+
+<img width="1907" height="867" alt="ASI:One New Coordination" src="https://github.com/user-attachments/assets/60f3df70-ab7d-45dd-8f05-8a240e228a2c" />
+
+<img width="1905" height="856" alt="ASI:One Coordination Result" src="https://github.com/user-attachments/assets/118cedf6-df0f-4edd-9c6e-71754d5d9d50" />
 
 ---
 
