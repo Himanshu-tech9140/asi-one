@@ -6,17 +6,23 @@ const { ApiError } = require('../utils/ApiError')
 const SERVICE_TYPES = ['emergency', 'hospital', 'clinic', 'pharmacy', 'blood_bank', 'specialist', 'ambulance']
 
 function validateServiceType(value) {
-  if (value === undefined || value === null) return undefined
-  if (typeof value !== 'string' || !SERVICE_TYPES.includes(value)) {
-    throw ApiError.badRequest('Invalid facility service type')
-  }
-  return value
+  if (value === undefined || value === null) return 'emergency'
+  if (typeof value !== 'string') return 'emergency'
+  const lower = value.trim().toLowerCase().replaceAll(' ', '_').replaceAll('-', '_')
+  if (lower.includes('ambulan')) return 'ambulance'
+  if (lower.includes('pharm') || lower.includes('chemist') || lower.includes('medicin')) return 'pharmacy'
+  if (lower.includes('blood')) return 'blood_bank'
+  if (lower.includes('clinic')) return 'clinic'
+  if (lower.includes('emerg') || lower.includes('hosp') || lower.includes('urgent')) return 'emergency'
+  if (lower.includes('special')) return 'specialist'
+  if (SERVICE_TYPES.includes(lower)) return lower
+  return 'emergency'
 }
 
 function validateRadius(value) {
   if (value === undefined || value === null) return 5000
   if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0 || value > MAX_RADIUS_METRES) {
-    throw ApiError.badRequest('Invalid search radius')
+    return 5000
   }
   return value
 }
@@ -30,7 +36,7 @@ const toolRegistry = {
         radius: { type: 'number', minimum: 1, maximum: MAX_RADIUS_METRES },
       }, additionalProperties: false,
     },
-    async execute(arguments_, context) {
+    async execute(arguments_ = {}, context = {}) {
       if (!context.location) throw ApiError.badRequest('Location is required')
       return findFacilities({
         latitude: context.location.lat,
@@ -47,7 +53,7 @@ const toolRegistry = {
         radius: { type: 'number', minimum: 1, maximum: MAX_RADIUS_METRES },
       }, additionalProperties: false,
     },
-    async execute(arguments_, context) {
+    async execute(arguments_ = {}, context = {}) {
       if (!context.location) throw ApiError.badRequest('Location is required')
       return findAmbulances({
         latitude: context.location.lat,
@@ -62,11 +68,16 @@ const toolRegistry = {
       type: 'object', properties: { facilityId: { type: 'string' } },
       required: ['facilityId'], additionalProperties: false,
     },
-    async execute(arguments_, context) {
+    async execute(arguments_ = {}, context = {}) {
       if (!context.location) throw ApiError.badRequest('Location is required')
-      if (!arguments_ || typeof arguments_.facilityId !== 'string') throw ApiError.badRequest('facilityId is required')
       const allTargets = (context.facilities || []).concat(context.ambulances || [])
-      const facility = allTargets.find((item) => item.id === arguments_.facilityId || item.placeId === arguments_.facilityId)
+      let facility = null
+      if (arguments_ && typeof arguments_.facilityId === 'string') {
+        facility = allTargets.find((item) => item.id === arguments_.facilityId || item.placeId === arguments_.facilityId)
+      }
+      if (!facility && allTargets.length > 0) {
+        facility = allTargets[0]
+      }
       if (!facility || !facility.location) throw ApiError.badRequest('Selected facility is not available for routing')
       return calculateRoute({ origin: context.location, destination: facility.location })
     },
