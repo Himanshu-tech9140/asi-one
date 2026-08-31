@@ -17,7 +17,7 @@ const toolExecutionSchema = new mongoose.Schema(
     toolName: {
       type: String,
       required: [true, 'toolName is required'],
-      enum: ['findFacilities', 'calculateRoute', 'searchWeb', 'externalAgent'],
+      enum: ['findFacilities', 'findAmbulances', 'calculateRoute', 'searchWeb', 'externalAgent'],
     },
     status: {
       type: String,
