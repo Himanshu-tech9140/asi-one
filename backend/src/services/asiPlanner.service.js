@@ -121,7 +121,17 @@ async function runPlan({ message, location, onEvent }) {
 
   try {
     for (let step = 0; step < MAX_AGENT_STEPS; step += 1) {
-      const assistantMessage = await asiOne.createChatCompletion({ messages, tools: plannerTools() })
+      let assistantMessage
+      try {
+        assistantMessage = await asiOne.createChatCompletion({ messages, tools: plannerTools() })
+      } catch (err) {
+        if (steps.length > 0) {
+          // If we already gathered verified facilities or ambulances from tools,
+          // proceed to grounded response rather than failing the coordination.
+          break
+        }
+        throw err
+      }
       if (step === 0) emit('planning_completed', { coordinationId, message: 'Execution plan ready' })
       messages.push({ role: 'assistant', content: assistantMessage.content || null, tool_calls: assistantMessage.tool_calls || [] })
       const calls = Array.isArray(assistantMessage.tool_calls) ? assistantMessage.tool_calls : []
@@ -185,8 +195,8 @@ async function runPlan({ message, location, onEvent }) {
     }
     await coordination.save()
     const data = { status: 'completed', coordinationId, intent, steps, result: results, finalResponse }
-    emit('final_response', { coordinationId, response: finalResponse, data })
-    emit('agent_completed', { coordinationId, status: 'completed' })
+    emit('final_response', { coordinationId, response: finalResponse, data, message: 'Coordination result ready' })
+    emit('agent_completed', { coordinationId, status: 'completed', message: 'Coordination complete' })
     return data
   } catch (error) {
     coordination.status = 'failed'; await coordination.save()

@@ -67,8 +67,24 @@ export function streamPlan(message, location, { onEvent, onError } = {}) {
   let closed = false
   const close = () => { if (!closed) { closed = true; source.close() } }
   types.forEach((type) => source.addEventListener(type, (event) => {
-    let data
-    try { data = JSON.parse(event.data) } catch { data = { message: 'Received an invalid activity update.' } }
+    let data = {}
+    if (event.data) {
+      try {
+        data = JSON.parse(event.data)
+      } catch {
+        data = { message: 'Coordination update received' }
+      }
+    }
+    if (!data.message) {
+      if (type === 'agent_started') data.message = 'CrisisFlow agent started'
+      else if (type === 'intent_detected') data.message = 'Request intent detected'
+      else if (type === 'planning_started') data.message = 'Creating execution plan'
+      else if (type === 'planning_completed') data.message = 'Execution plan ready'
+      else if (type === 'tool_started') data.message = 'Executing tool...'
+      else if (type === 'tool_completed') data.message = 'Tool execution completed'
+      else if (type === 'final_response') data.message = 'Coordination result ready'
+      else if (type === 'agent_completed') data.message = 'Coordination complete'
+    }
     onEvent?.({ type, ...data })
     if (type === 'agent_completed' || type === 'error') close()
   }))

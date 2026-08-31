@@ -50,7 +50,9 @@ const planHandler = asyncHandler(async (req, res) => {
 
 const streamHandler = async (req, res) => {
   let disconnected = false
+  let errorSent = false
   const send = (type, data) => {
+    if (type === 'error') errorSent = true
     if (!disconnected && !res.writableEnded) res.write(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`)
   }
   res.status(200).set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache, no-transform', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' })
@@ -65,7 +67,9 @@ const streamHandler = async (req, res) => {
     validateUnderstandBody({ message })
     await asiPlannerService.runPlan({ message, location, onEvent: send })
   } catch (error) {
-    send('error', { message: error instanceof ApiError ? error.message : 'CrisisFlow could not complete the coordination.' })
+    if (!errorSent) {
+      send('error', { message: error instanceof ApiError ? error.message : 'CrisisFlow could not complete the coordination.' })
+    }
   } finally {
     if (!disconnected && !res.writableEnded) res.end()
   }
