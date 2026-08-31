@@ -66,11 +66,11 @@ export default function NewCoordination() {
     [ambulances, facilities],
   )
 
-  const location = browserLocation.location
+  const location = browserLocation.location || { lat: 28.6280, lng: 77.3649 }
   const requestWithPreference = `${request.trim()} Focus on finding a ${SERVICE_PROMPTS[service]}. Travel preference: ${travel}.`
 
   const startCoordination = () => {
-    if (!location || !request.trim()) return
+    if (!request.trim()) return
     setCoordinating(true)
     setError('')
     setResult(null)

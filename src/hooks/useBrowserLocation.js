@@ -1,9 +1,11 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+
+const DEFAULT_LOCATION = { lat: 28.6280, lng: 77.3649 }
 
 function messageFor(error) {
-  if (error?.code === 1) return 'Location permission was denied. Enter latitude and longitude manually.'
-  if (error?.code === 2) return 'Your location is unavailable. Try again or enter coordinates manually.'
-  if (error?.code === 3) return 'Location request timed out. Try again or enter coordinates manually.'
+  if (error?.code === 1) return 'Location permission was denied. Using default location; you can also enter coordinates manually.'
+  if (error?.code === 2) return 'Your location is unavailable. Using default location; you can also enter coordinates manually.'
+  if (error?.code === 3) return 'Location request timed out. Using default location; you can also enter coordinates manually.'
   return 'Unable to determine your location. Enter coordinates manually.'
 }
 
@@ -14,13 +16,12 @@ export function parseCoordinates(value) {
 }
 
 export function useBrowserLocation() {
-  const [location, setLocation] = useState(null)
+  const [location, setLocation] = useState(DEFAULT_LOCATION)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      setError('Browser geolocation is not supported. Enter latitude and longitude manually.')
       return
     }
     setLoading(true)
@@ -28,17 +29,22 @@ export function useBrowserLocation() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude: lat, longitude: lng } = position.coords
-        if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-          setError('The browser returned invalid coordinates. Enter them manually.')
-        } else {
+        if (Number.isFinite(lat) && Number.isFinite(lng)) {
           setLocation({ lat, lng })
         }
         setLoading(false)
       },
-      (reason) => { setError(messageFor(reason)); setLoading(false) },
+      (reason) => {
+        setError(messageFor(reason))
+        setLoading(false)
+      },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 },
     )
   }, [])
+
+  useEffect(() => {
+    requestLocation()
+  }, [requestLocation])
 
   const setManualLocation = useCallback((value) => {
     const parsed = parseCoordinates(value)

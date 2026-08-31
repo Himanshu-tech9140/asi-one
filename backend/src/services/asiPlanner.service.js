@@ -115,7 +115,7 @@ async function runPlan({ message, location, onEvent }) {
   if (intent.locationRequired && !normalizedLocation) {
     coordination.status = 'failed'; await coordination.save()
     const finalResponse = 'I need your location or a starting location to find nearby facilities or calculate a route.'
-    emit('error', { coordinationId, message: finalResponse })
+    emit('location_required', { coordinationId, message: finalResponse })
     return { status: 'location_required', coordinationId, intent, steps: [], result: null, finalResponse }
   }
   emit('planning_started', { coordinationId, message: 'Creating execution plan' })
@@ -136,11 +136,8 @@ async function runPlan({ message, location, onEvent }) {
         assistantMessage = await asiOne.createChatCompletion({ messages, tools: plannerTools() })
       } catch (err) {
         if (steps.length > 0) {
-          // If we already gathered verified facilities or ambulances from tools,
-          // proceed to grounded response rather than failing the coordination.
           break
         }
-        // Fallback to direct tool execution based on detected intent
         const fallbackTool =
           intent.serviceType === 'ambulance' || message.toLowerCase().includes('ambulance')
             ? 'findAmbulances'
@@ -166,7 +163,10 @@ async function runPlan({ message, location, onEvent }) {
       const call = calls[0]
       const toolName = call && call.function && call.function.name
       const tool = toolRegistry[toolName]
-      if (!tool) throw ApiError.badRequest('AI selected an unsupported tool')
+      if (!tool) {
+        if (steps.length > 0) break
+        throw ApiError.badRequest('AI selected an unsupported tool')
+      }
       const args = parseArguments(call)
       const execution = await ToolExecution.create({ coordinationId: coordination._id, toolName, status: 'running', input: args, startedAt: new Date() })
       const startMsg =
@@ -197,11 +197,13 @@ async function runPlan({ message, location, onEvent }) {
         execution.status = 'failed'; execution.error = 'Tool execution failed'; execution.completedAt = new Date(); await execution.save()
         steps.push({ tool: toolName, status: 'failed' })
         emit('tool_failed', { coordinationId, tool: toolName, message: 'Unable to complete this step' })
+        if (steps.filter(s => s.status === 'completed').length > 0) {
+          break
+        }
         throw error
       }
     }
     if (!finalResponse) {
-      if (steps.length >= MAX_AGENT_STEPS) throw ApiError.internal('Maximum agent steps reached')
       finalResponse = 'The requested information was retrieved.'
     }
     finalResponse = buildGroundedFinalResponse({
