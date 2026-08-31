@@ -1,0 +1,49 @@
+services:
+  # ------------------------------------------------------------
+  # Backend Web Service (Node.js / Express / MongoDB)
+  # ------------------------------------------------------------
+  - type: web
+    name: crisisflow-api
+    env: node
+    rootDir: backend
+    plan: starter
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 20.19.0
+      - key: MONGODB_URI
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
+      - key: ASI_ONE_API_KEY
+        sync: false
+      - key: ASI_ONE_BASE_URL
+        value: https://api.asi1.ai/v1
+      - key: ASI_ONE_MODEL
+        value: asi1
+
+  # ------------------------------------------------------------
+  # Frontend Static Site (React / Vite)
+  # ------------------------------------------------------------
+  - type: web
+    name: crisisflow-web
+    env: static
+    rootDir: .
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NODE_VERSION
+        value: 20.19.0
+      - key: VITE_API_BASE_URL
+        sync: false
+

@@ -12,7 +12,7 @@ export function DecisionFactors() {
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-accent to-violet-400"
+              className="h-full rounded-full bg-accent"
               style={{ width: `${f.score}%` }}
             />
           </div>

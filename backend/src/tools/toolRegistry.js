@@ -1,8 +1,9 @@
 const { findFacilities, MAX_RADIUS_METRES } = require('./findFacilities.tool')
+const { findAmbulances } = require('./findAmbulances.tool')
 const { calculateRoute } = require('./calculateRoute.tool')
 const { ApiError } = require('../utils/ApiError')
 
-const SERVICE_TYPES = ['emergency', 'hospital', 'clinic', 'pharmacy', 'blood_bank', 'specialist']
+const SERVICE_TYPES = ['emergency', 'hospital', 'clinic', 'pharmacy', 'blood_bank', 'specialist', 'ambulance']
 
 function validateServiceType(value) {
   if (value === undefined || value === null) return undefined
@@ -39,8 +40,24 @@ const toolRegistry = {
       })
     },
   },
+  findAmbulances: {
+    description: 'Find nearby real ambulance services and emergency transport providers for the supplied user location.',
+    inputSchema: {
+      type: 'object', properties: {
+        radius: { type: 'number', minimum: 1, maximum: MAX_RADIUS_METRES },
+      }, additionalProperties: false,
+    },
+    async execute(arguments_, context) {
+      if (!context.location) throw ApiError.badRequest('Location is required')
+      return findAmbulances({
+        latitude: context.location.lat,
+        longitude: context.location.lng,
+        radius: validateRadius(arguments_.radius),
+      })
+    },
+  },
   calculateRoute: {
-    description: 'Calculate a route to a facility returned by findFacilities. Use its facilityId only.',
+    description: 'Calculate a route to a facility or ambulance service returned by findFacilities or findAmbulances. Use its facilityId only.',
     inputSchema: {
       type: 'object', properties: { facilityId: { type: 'string' } },
       required: ['facilityId'], additionalProperties: false,
@@ -48,7 +65,8 @@ const toolRegistry = {
     async execute(arguments_, context) {
       if (!context.location) throw ApiError.badRequest('Location is required')
       if (!arguments_ || typeof arguments_.facilityId !== 'string') throw ApiError.badRequest('facilityId is required')
-      const facility = (context.facilities || []).find((item) => item.id === arguments_.facilityId || item.placeId === arguments_.facilityId)
+      const allTargets = (context.facilities || []).concat(context.ambulances || [])
+      const facility = allTargets.find((item) => item.id === arguments_.facilityId || item.placeId === arguments_.facilityId)
       if (!facility || !facility.location) throw ApiError.badRequest('Selected facility is not available for routing')
       return calculateRoute({ origin: context.location, destination: facility.location })
     },

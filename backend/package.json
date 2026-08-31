@@ -8,8 +8,8 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "agentverse:metadata": "node scripts/agentverse-register.js",
-    "test": "node tests/coordination.service.test.js && node tests/maps.service.test.js && node tests/asiOne.service.test.js && node tests/asiPlanner.service.test.js && node tests/sse.stream.test.js && node tests/crisisflow.agent.test.js && node tests/agentverse.bridge.test.js",
-    "syntax:check": "node --check src/server.js && node --check src/controllers/ai.controller.js && node --check src/services/asiPlanner.service.js && node --check src/agents/crisisflow/crisisflow.agent.js && node --check src/agents/crisisflow/crisisflow.handler.js && node --check src/agents/crisisflow/crisisflow.manifest.js && node --check src/utils/acp.js && node --check src/agentverse/chatProtocol.js && node --check src/agentverse/crisisflow.bridge.js && node --check scripts/agentverse-register.js"
+    "test": "node tests/coordination.service.test.js && node tests/maps.service.test.js && node tests/asiOne.service.test.js && node tests/asiPlanner.service.test.js && node tests/sse.stream.test.js && node tests/crisisflow.agent.test.js && node tests/agentverse.bridge.test.js && node tests/ambulance.test.js && node tests/production.env.test.js",
+    "syntax:check": "node --check src/server.js && node --check src/controllers/ai.controller.js && node --check src/controllers/facility.controller.js && node --check src/routes/facility.routes.js && node --check src/tools/findAmbulances.tool.js && node --check src/tools/toolRegistry.js && node --check src/services/maps.service.js && node --check src/services/facility.service.js && node --check src/services/asiPlanner.service.js && node --check src/agents/crisisflow/crisisflow.agent.js && node --check src/agents/crisisflow/crisisflow.handler.js && node --check src/agents/crisisflow/crisisflow.manifest.js && node --check src/utils/acp.js && node --check src/agentverse/chatProtocol.js && node --check src/agentverse/crisisflow.bridge.js && node --check scripts/agentverse-register.js"
   },
   "keywords": [
     "crisisflow",
@@ -18,7 +18,6 @@
     "express",
     "mongodb"
   ],
-  "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

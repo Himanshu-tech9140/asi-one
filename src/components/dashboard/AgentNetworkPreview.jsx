@@ -22,7 +22,7 @@ export function AgentNetworkPreview() {
             Agent Network
           </h2>
           <p className="mt-0.5 text-xs text-slate-400">
-            Capabilities CrisisFlow can activate for your request.
+            Healthcare capabilities ASI:One can activate for your request.
           </p>
         </div>
       </div>
@@ -31,7 +31,7 @@ export function AgentNetworkPreview() {
         {/* Center node */}
         <div className="relative z-10 flex items-center gap-2 rounded-xl border border-accent/30 bg-accent/10 px-4 py-2 shadow-glow">
           <Activity size={15} className="text-accent-soft" />
-          <span className="text-sm font-semibold text-white">CrisisFlow Agent</span>
+          <span className="text-sm font-semibold text-white">ASI:One Healthcare Agent</span>
         </div>
 
         {/* Connectors */}

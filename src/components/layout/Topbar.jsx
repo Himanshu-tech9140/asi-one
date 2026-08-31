@@ -1,10 +1,11 @@
 import React from 'react'
-import { Menu, Bell, CircleUserRound } from 'lucide-react'
+import { Menu, Bell, CircleUserRound, MapPin, Siren } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { AGENT_STATUS } from '../../data/mockData'
 
 export function Topbar({ title, onMenu, notifications = 0 }) {
   return (
-    <header className="glass sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b px-4 sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 sm:px-6">
       <div className="flex items-center gap-3">
         <button
           onClick={onMenu}
@@ -13,20 +14,19 @@ export function Topbar({ title, onMenu, notifications = 0 }) {
         >
           <Menu size={20} />
         </button>
-        <h1 className="truncate text-base font-semibold tracking-tight text-white sm:text-lg">
+        <h1 className="truncate text-base font-semibold tracking-tight text-slate-900 sm:text-lg">
           {title}
         </h1>
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
-        <div className="hidden items-center gap-2 rounded-full border border-white/[0.07] bg-white/[0.03] px-3 py-1.5 sm:flex">
+        <div className="hidden items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 lg:flex">
+          <MapPin size={14} className="text-blue-600" />
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
           </span>
-          <span className="text-xs font-medium text-slate-300">
-            {AGENT_STATUS.label.split('Agent ')[1]}
-          </span>
+          <span className="text-xs font-medium text-slate-600">Location ready · {AGENT_STATUS.label}</span>
         </div>
 
         <button
@@ -40,6 +40,10 @@ export function Topbar({ title, onMenu, notifications = 0 }) {
             </span>
           )}
         </button>
+
+        <Link to="/new" className="hidden items-center gap-2 rounded-lg bg-accent px-3 py-2 text-xs font-semibold !text-white hover:bg-accent-soft sm:inline-flex">
+          <Siren size={15} /> Emergency Help
+        </Link>
 
         <button
           aria-label="Account menu"

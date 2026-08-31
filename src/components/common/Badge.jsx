@@ -1,12 +1,12 @@
 import React from 'react'
 
 const tones = {
-  green: 'text-emerald-300 bg-emerald-500/10 border-emerald-400/20',
-  blue: 'text-accent-soft bg-accent/10 border-accent/20',
-  amber: 'text-amber-300 bg-amber-500/10 border-amber-400/20',
-  red: 'text-rose-300 bg-rose-500/10 border-rose-400/20',
-  violet: 'text-violet-300 bg-violet-500/10 border-violet-400/20',
-  slate: 'text-slate-300 bg-white/[0.05] border-white/10',
+  green: 'text-green-700 bg-green-50 border-green-200',
+  blue: 'text-blue-700 bg-blue-50 border-blue-200',
+  amber: 'text-amber-700 bg-amber-50 border-amber-200',
+  red: 'text-red-700 bg-red-50 border-red-200',
+  violet: 'text-slate-700 bg-slate-100 border-slate-200',
+  slate: 'text-slate-600 bg-slate-50 border-slate-200',
 }
 
 export function Badge({ tone = 'slate', dot = false, children, className = '' }) {

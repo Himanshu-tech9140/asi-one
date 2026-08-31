@@ -2,7 +2,14 @@ import React from 'react'
 import { Star, MapPin, Clock, HeartPulse, ChevronRight, Navigation } from 'lucide-react'
 import { Button } from '../common/Button'
 
-export function RecommendationCard({ facility = {}, empty = false, onRoute, onDetails }) {
+export function RecommendationCard({
+  facility = {},
+  empty = false,
+  onRoute,
+  onDetails,
+  onLiveNavigation,
+  isNavigating = false,
+}) {
   if (empty) {
     return (
       <section
@@ -29,16 +36,16 @@ export function RecommendationCard({ facility = {}, empty = false, onRoute, onDe
             <Star size={15} fill="currentColor" />
           </span>
           <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200">
-            Agent Recommendation
+            ASI:One Recommendation
           </h3>
         </header>
 
-        <div className="mt-4 flex items-start justify-between gap-3">
-          <div>
+        <div className="mt-4 flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
             <h4 className="text-lg font-semibold text-white">{facility.name}</h4>
             <p className="mt-0.5 text-xs text-slate-400">{facility.open}</p>
           </div>
-          <span className="rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-semibold text-accent-soft ring-1 ring-inset ring-accent/30">
+          <span className="shrink-0 rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-semibold text-accent-soft ring-1 ring-inset ring-accent/30">
             {facility.match ? `${facility.match}% match` : 'Result'}
           </span>
         </div>
@@ -63,15 +70,32 @@ export function RecommendationCard({ facility = {}, empty = false, onRoute, onDe
           </ul>
         </div>
 
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-          <Button className="flex-1" onClick={onRoute} disabled={!onRoute}>
-            <Navigation size={15} />
-            Open Route
-          </Button>
-          <Button variant="secondary" className="flex-1" onClick={onDetails} disabled={!onDetails}>
-            View Details
-            <ChevronRight size={15} />
-          </Button>
+        <div className="mt-4 flex flex-col gap-2">
+          {onLiveNavigation && (
+            <Button
+              className="w-full bg-accent hover:bg-accent-soft text-white"
+              onClick={onLiveNavigation}
+              disabled={!facility?.location && !(facility?.lat && facility?.lng)}
+            >
+              <Navigation size={15} />
+              {isNavigating ? 'Live Navigation Active' : 'Start Live Navigation'}
+            </Button>
+          )}
+
+          <div className="flex flex-col gap-2 sm:flex-row">
+            {onRoute && (
+              <Button variant="secondary" className="flex-1" onClick={onRoute} disabled={!onRoute}>
+                <Navigation size={15} />
+                Get Fastest Route
+              </Button>
+            )}
+            {onDetails && (
+              <Button variant="secondary" className="flex-1" onClick={onDetails} disabled={!onDetails}>
+                View Details
+                <ChevronRight size={15} />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </section>
@@ -80,12 +104,12 @@ export function RecommendationCard({ facility = {}, empty = false, onRoute, onDe
 
 function Stat({ icon: Icon, value, label }) {
   return (
-    <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-2.5">
+    <div className="min-w-0 rounded-xl bg-white/[0.03] border border-white/[0.06] p-2.5">
       <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-        <Icon size={12} className="text-accent-soft" />
-        {label}
+        <Icon size={12} className="shrink-0 text-accent-soft" />
+        <span className="truncate">{label}</span>
       </div>
-      <div className="mt-1 font-mono text-sm font-semibold text-white">{value}</div>
+      <div className="mt-1 truncate font-mono text-sm font-semibold text-white">{value}</div>
     </div>
   )
 }

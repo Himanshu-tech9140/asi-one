@@ -95,8 +95,21 @@ const manifest = {
       },
     },
     {
+      name: 'find_ambulance',
+      description: 'Find real emergency ambulance services and medical transport near a location.',
+      params: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          location: coordinateSchema(),
+          radius: { type: 'number', minimum: 1, maximum: 50000 },
+        },
+        required: ['location'],
+      },
+    },
+    {
       name: 'calculate_route',
-      description: 'Calculate a driving route from a location to a previously returned facility.',
+      description: 'Calculate a driving route from a location to a previously returned facility or ambulance service.',
       params: {
         type: 'object',
         additionalProperties: false,

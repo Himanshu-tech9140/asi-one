@@ -252,12 +252,12 @@ After MongoDB is running the backend health check will report `database: connect
 
 | Variable       | Default                            | Description                        |
 | -------------- | ---------------------------------- | ---------------------------------- |
-| `PORT`         | `5000`                             | Server port                        |
+| `PORT`         | `5000` (dev)                       | Server port (Render provides PORT automatically) |
 | `NODE_ENV`     | `development`                      | Environment mode                   |
-| `MONGODB_URI`  | `mongodb://localhost:27017/crisisflow` | MongoDB connection string      |
-| `FRONTEND_URL` | `http://localhost:5173`            | Allowed CORS origin (frontend)     |
-| `GOOGLE_MAPS_API_KEY` | (empty)                     | Google Cloud API key (optional; enables real facility/route data) |
-| `ASI_ONE_API_KEY` | (empty)                     | ASI:One API key (optional; enables intent understanding) |
+| `MONGODB_URI`  | `mongodb://localhost:27017/crisisflow` (dev) | MongoDB connection string. **Required in production** (no localhost fallback). |
+| `FRONTEND_URL` | `http://localhost:5173` (dev)      | Allowed CORS origin (frontend). **Required in production** (no localhost fallback, never a wildcard). |
+| `GOOGLE_MAPS_API_KEY` | (empty)                     | Google Cloud API key. Enables real facility/route data. **Required in production** (no mock fallback). |
+| `ASI_ONE_API_KEY` | (empty)                     | ASI:One API key. Enables intent understanding. **Required in production** (no simulated fallback). |
 | `ASI_ONE_BASE_URL` | `https://api.asi1.ai/v1`     | ASI:One OpenAI-compatible base URL |
 | `ASI_ONE_MODEL` | `asi1`                       | ASI:One model id (`asi1`, `asi1-mini`, `asi1-ultra`) |
 | `ACP_AGENT_ID` | `crisisflow-agent`           | Stable agent identifier presented over ACP (Phase 8) |
@@ -328,8 +328,8 @@ Check your [Google Cloud Billing](https://console.cloud.google.com/billing) dash
 
 If `GOOGLE_MAPS_API_KEY` is not configured:
 
-- **GET /api/facilities** returns mock data (useful for testing without Google API).
-- **POST /api/routes/calculate** returns a `500` error with message "Maps service is not configured".
+- **Development only** — **GET /api/facilities** returns mock data (useful for testing without Google API); **POST /api/routes/calculate** returns a `500` error with message "Maps service is not configured".
+- **Production (`NODE_ENV=production`)** — facility search fails clearly with an internal error instead of returning mock facilities. Configure `GOOGLE_MAPS_API_KEY` in the deployment environment.
 
 The backend still boots and serves other endpoints normally.
 
@@ -402,7 +402,8 @@ Response:
 
 If `ASI_ONE_API_KEY` is not configured:
 
-- **POST /api/ai/understand** returns a `500` error with message "AI service is not configured".
+- **POST /api/ai/understand** returns a `500` error with message "AI service is not configured". ASI:One responses are never simulated in any environment.
+- **Production (`NODE_ENV=production`)** — configure `ASI_ONE_API_KEY` in the deployment environment; without it AI endpoints fail clearly rather than simulate data.
 
 The backend still boots and serves other endpoints normally.
 

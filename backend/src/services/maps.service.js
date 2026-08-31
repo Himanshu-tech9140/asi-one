@@ -57,6 +57,9 @@ const NEARBY_FIELDS = [
   'places.types',
   'places.rating',
   'places.userRatingCount',
+  'places.internationalPhoneNumber',
+  'places.nationalPhoneNumber',
+  'places.websiteUri',
 ].join(',')
 
 const DETAIL_FIELDS = [
@@ -129,7 +132,22 @@ async function googleFetch(url, options) {
 
 // --- normalization -------------------------------------------------
 
-function normalizePlace(place, { withDetails = false } = {}) {
+function haversineMeters(p1, p2) {
+  if (!p1 || !p2 || typeof p1.lat !== 'number' || typeof p2.lat !== 'number') return 0
+  const R = 6371000
+  const dLat = ((p2.lat - p1.lat) * Math.PI) / 180
+  const dLng = ((p2.lng - p1.lng) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((p1.lat * Math.PI) / 180) *
+      Math.cos((p2.lat * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * c
+}
+
+function normalizePlace(place, { withDetails = false, origin = null } = {}) {
   const normalized = {
     id: place.id || null,
     name: place.displayName && place.displayName.text ? place.displayName.text : 'Unknown',
@@ -145,9 +163,15 @@ function normalizePlace(place, { withDetails = false } = {}) {
     userRatingsTotal: typeof place.userRatingCount === 'number' ? place.userRatingCount : null,
   }
 
-  if (withDetails) {
-    if (place.internationalPhoneNumber) normalized.phone = place.internationalPhoneNumber
-    if (place.websiteUri) normalized.website = place.websiteUri
+  const phone = place.internationalPhoneNumber || place.nationalPhoneNumber
+  if (phone) normalized.phone = phone
+  if (place.websiteUri) normalized.website = place.websiteUri
+
+  if (origin && normalized.location) {
+    const distMeters = Math.round(haversineMeters(origin, normalized.location))
+    normalized.distanceMeters = distMeters
+    normalized.distance = Number((distMeters / 1000).toFixed(1))
+    normalized.distanceText = formatDistanceText(distMeters)
   }
 
   // Only include fields Google actually returned.
@@ -350,10 +374,37 @@ async function safeJson(res) {
   }
 }
 
+async function findAmbulances({ latitude, longitude, radius = 10000 }) {
+  const key = requireApiKey()
+  const data = await textSearch(key, {
+    latitude,
+    longitude,
+    radius,
+    query: 'ambulance service',
+  })
+
+  if (!Array.isArray(data.places)) return []
+  const origin = { lat: latitude, lng: longitude }
+  const ambulances = data.places.map((p) => {
+    const norm = normalizePlace(p, { origin })
+    if (!norm.types || norm.types.length === 0) {
+      norm.types = ['ambulance', 'emergency_service']
+    } else if (!norm.types.includes('ambulance')) {
+      norm.types = ['ambulance', ...norm.types]
+    }
+    return norm
+  })
+
+  // Rank nearest first
+  ambulances.sort((a, b) => (a.distanceMeters ?? Infinity) - (b.distanceMeters ?? Infinity))
+  return ambulances
+}
+
 module.exports = {
   searchNearbyFacilities,
+  findAmbulances,
   getPlaceDetails,
   calculateRoute,
   // exposed for tests
-  _internals: { normalizePlace, normalizeRoute, parseDurationSeconds },
+  _internals: { normalizePlace, normalizeRoute, parseDurationSeconds, haversineMeters },
 }

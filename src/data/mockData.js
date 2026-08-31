@@ -290,6 +290,11 @@ export const AGENT_CAPABILITIES = [
 // ------------------------------------------------------------
 export const QUICK_ACTIONS = [
   {
+    id: 'smartAmbulance',
+    label: '🚑 Smart Ambulance Finder',
+    description: 'Find closest emergency ambulance & contact info',
+  },
+  {
     id: 'emergencyFacility',
     label: '🏥 Find Emergency Facility',
     description: 'Locate nearby emergency care',
@@ -311,7 +316,7 @@ export const QUICK_ACTIONS = [
   },
   {
     id: 'fastestRoute',
-    label: '🚑 Find Fastest Route',
+    label: '🧭 Find Fastest Route',
     description: 'Get the quickest path to care',
   },
 ]

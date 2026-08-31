@@ -25,6 +25,7 @@ const { env } = require('../config/env')
 // Maps capability names to the human phrasing used in replies.
 const LABELS = {
   find_emergency_facility: 'emergency healthcare facility',
+  find_ambulance: 'emergency ambulance service',
   find_healthcare_service: 'healthcare facility',
   find_pharmacy: 'pharmacy',
   find_blood_bank: 'blood bank',
@@ -37,6 +38,7 @@ const LABELS = {
 // text falls back to a generic healthcare facility search.
 function classifyCapability(text) {
   const t = (text || '').toLowerCase()
+  if (/\bambulance\b|\bparamedic\b|\bmedevac\b|\bems\b/.test(t)) return 'find_ambulance'
   if (/\bblood\b|\bbank\b|\bdonor\b/.test(t)) return 'find_blood_bank'
   if (/\bpharmacy\b|\bchemist\b|\bdrugstore\b|\bmedicine\b/.test(t)) return 'find_pharmacy'
   if (/(route|direction|drive|navigate|how far|distance|travel|way\s+to)/.test(t)) {
@@ -80,6 +82,7 @@ function baseLocation() {
 // Build capability params from text + location.
 function buildParams(capability, location) {
   switch (capability) {
+    case 'find_ambulance':
     case 'find_blood_bank':
     case 'find_pharmacy':
     case 'find_emergency_facility':
@@ -93,13 +96,20 @@ function buildParams(capability, location) {
 }
 
 function summarizeFacilities(capability, result) {
-  const facilities = Array.isArray(result.facilities) ? result.facilities : []
-  if (facilities.length === 0) {
+  const items = Array.isArray(result.ambulances)
+    ? result.ambulances
+    : Array.isArray(result.facilities)
+    ? result.facilities
+    : []
+  if (items.length === 0) {
     return `No ${LABELS[capability] || 'healthcare facility'} found nearby.`
   }
-  const top = facilities.slice(0, 5)
+  const top = items.slice(0, 5)
   const lines = top.map(
-    (f, i) => `${i + 1}. ${f.name || 'Unknown'}${f.address ? ` — ${f.address}` : ''}${f.rating ? ` (rating ${f.rating})` : ''}`,
+    (f, i) =>
+      `${i + 1}. ${f.name || 'Unknown'}${f.address ? ` — ${f.address}` : ''}${
+        f.phone ? ` (Tel: ${f.phone})` : ''
+      }${f.rating ? ` (rating ${f.rating})` : ''}`,
   )
   return lines.join('\n')
 }

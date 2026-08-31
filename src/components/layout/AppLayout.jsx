@@ -14,7 +14,7 @@ const PAGE_TITLES = [
 function titleFor(pathname) {
   if (pathname.startsWith('/task/')) return 'Task Details'
   const match = PAGE_TITLES.find((p) => p.path === pathname)
-  return match?.title || 'CrisisFlow AI'
+  return match?.title || 'ASI:One Healthcare Coordination'
 }
 
 export default function AppLayout() {
@@ -25,7 +25,6 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen">
       {/* Desktop sidebar */}
-      <div className={`hidden md:block ${collapsed ? 'md:w-[72px]' : 'md:w-64'} fixed`} />
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
 
       {/* Mobile nav */}
@@ -34,7 +33,7 @@ export default function AppLayout() {
       <div className={`flex flex-col transition-[padding] duration-300 ${collapsed ? 'md:pl-[72px]' : 'md:pl-64'}`}>
         <Topbar title={titleFor(location.pathname)} onMenu={() => setMobileOpen(true)} notifications={2} />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8" id="main-content">
+        <main className="flex-1 p-3 sm:p-6 lg:p-8" id="main-content">
           <div key={location.pathname} className="animate-fadeUp">
             <Outlet />
           </div>

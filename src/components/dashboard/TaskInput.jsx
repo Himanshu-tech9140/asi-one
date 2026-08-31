@@ -1,5 +1,5 @@
 import React from 'react'
-import { Mic, MapPin, ArrowRight, Sparkles } from 'lucide-react'
+import { Mic, MapPin, ArrowRight, HeartPulse } from 'lucide-react'
 import { Button } from '../common/Button'
 import { QUICK_ACTIONS } from '../../data/mockData'
 
@@ -15,11 +15,10 @@ export function TaskInput({ value, onChange, onSubmit, onUseLocation, running })
       aria-label="Task input"
       className="card-surface relative overflow-hidden p-5 sm:p-6"
     >
-      <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
       <div className="relative">
         <h2 className="flex items-center gap-2 text-sm font-semibold tracking-tight text-slate-100">
-          <Sparkles size={16} className="text-accent-soft" />
-          New Coordination
+          <HeartPulse size={16} className="text-accent" />
+          Healthcare request
         </h2>
 
         <label htmlFor="task-input" className="mt-4 block text-sm font-medium text-slate-300">
@@ -31,7 +30,7 @@ export function TaskInput({ value, onChange, onSubmit, onUseLocation, running })
           rows={3}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Example: Find the best emergency facility near my current location..."
+          placeholder="Describe what you need help with..."
           className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-base-900/60 p-3.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent/50 focus:ring-1 focus:ring-accent/40"
           aria-label="Describe your coordination request"
         />

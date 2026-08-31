@@ -5,7 +5,7 @@ const { toolRegistry, plannerTools } = require('../tools/toolRegistry')
 const { ApiError } = require('../utils/ApiError')
 
 const MAX_AGENT_STEPS = 5
-const PLANNER_PROMPT = `You are CrisisFlow's healthcare coordination planner. Use only the provided tools. Never invent coordinates, availability, treatment, diagnoses, prescriptions, or medical advice. For facility discovery use findFacilities; for travel to a returned facility use calculateRoute with its exact facilityId. When enough data is available, return a concise, factual final answer with no tool call. Do not reveal reasoning.`
+const PLANNER_PROMPT = `You are CrisisFlow's healthcare coordination planner. Use only the provided tools. Never invent coordinates, availability, treatment, diagnoses, prescriptions, or medical advice. For facility discovery use findFacilities; for ambulance discovery use findAmbulances; for travel to a returned facility or ambulance service use calculateRoute with its exact facilityId. When enough data is available, return a concise, factual final answer with no tool call. Do not reveal reasoning.`
 
 function validateLocation(location) {
   if (!location) return null
@@ -16,7 +16,20 @@ function validateLocation(location) {
 }
 
 function safeToolResult(name, result) {
-  if (name === 'findFacilities') return { facilities: (result.facilities || []).slice(0, 10).map(({ id, placeId, name, address, location, types, rating, userRatingsTotal }) => ({ id, placeId, name, address, location, types, rating, userRatingsTotal })) }
+  if (name === 'findFacilities') {
+    return {
+      facilities: (result.facilities || []).slice(0, 10).map(({ id, placeId, name, address, location, types, rating, userRatingsTotal, phone, website, distanceMeters, distanceText }) => ({
+        id, placeId, name, address, location, types, rating, userRatingsTotal, phone, website, distanceMeters, distanceText,
+      })),
+    }
+  }
+  if (name === 'findAmbulances') {
+    return {
+      ambulances: (result.ambulances || []).slice(0, 10).map(({ id, placeId, name, address, location, types, rating, userRatingsTotal, phone, website, distanceMeters, distanceText }) => ({
+        id, placeId, name, address, location, types, rating, userRatingsTotal, phone, website, distanceMeters, distanceText,
+      })),
+    }
+  }
   if (name === 'calculateRoute') {
     const { distanceMeters, durationSeconds, distanceText, durationText } = result
     return { distanceMeters, durationSeconds, distanceText, durationText }
@@ -29,25 +42,42 @@ function parseArguments(toolCall) {
 }
 
 function facilityForRoute(arguments_, context) {
-  return (context.facilities || []).find((facility) => facility.id === arguments_.facilityId || facility.placeId === arguments_.facilityId) || null
+  const allTargets = (context.facilities || []).concat(context.ambulances || [])
+  return allTargets.find((facility) => facility.id === arguments_.facilityId || facility.placeId === arguments_.facilityId) || null
 }
 
 // The planner may choose tools, but it is not allowed to narrate a facility
-// that was not selected by the verified tool execution.  Final user-facing
+// that was not selected by the verified tool execution. Final user-facing
 // facility/route facts are therefore rendered from normalized tool output.
-function buildGroundedFinalResponse({ modelResponse, facilities, facilitySearchAttempted, selectedFacility, route }) {
+function buildGroundedFinalResponse({ modelResponse, facilities = [], ambulances = [], facilitySearchAttempted, ambulanceSearchAttempted, selectedFacility, route }) {
   if (selectedFacility) {
+    const isAmb = selectedFacility.types?.includes('ambulance') || selectedFacility.name?.toLowerCase().includes('ambulance')
+    const label = isAmb ? 'Confirmed ambulance service' : 'Confirmed facility'
     const address = selectedFacility.address ? `\nAddress: ${selectedFacility.address}` : ''
+    const contact = selectedFacility.phone ? `\nContact: ${selectedFacility.phone}` : ''
     const routeSummary = route && (route.distanceText || route.durationText)
       ? `\nFastest route: ${route.distanceText || 'Distance unavailable'}${route.durationText ? ` (${route.durationText})` : ''}.`
       : ''
-    return `Confirmed facility: ${selectedFacility.name}.${address}${routeSummary}`
+    return `${label}: ${selectedFacility.name}.${address}${contact}${routeSummary}`
+  }
+  if (ambulances.length > 0 && facilities.length > 0) {
+    const amb = ambulances[0]
+    const fac = facilities[0]
+    const ambPhone = amb.phone ? ` (Tel: ${amb.phone})` : ''
+    return `Nearest ambulance service: ${amb.name}${ambPhone}.\nNearest emergency facility: ${fac.name}.${fac.address ? `\nAddress: ${fac.address}` : ''}`
+  }
+  if (ambulances.length > 0) {
+    const amb = ambulances[0]
+    const phone = amb.phone ? `\nContact: ${amb.phone}` : ''
+    return `Nearest ambulance service found: ${amb.name}.${amb.address ? `\nAddress: ${amb.address}` : ''}${phone}`
   }
   if (facilities.length > 0) {
     const facility = facilities[0]
     return `Nearby facility found: ${facility.name}.${facility.address ? `\nAddress: ${facility.address}` : ''}`
   }
-  if (facilitySearchAttempted) return 'No facility was confirmed for this request.'
+  if (facilitySearchAttempted && !ambulanceSearchAttempted) return 'No facility was confirmed for this request.'
+  if (ambulanceSearchAttempted && !facilitySearchAttempted) return 'No ambulance service was confirmed for this request.'
+  if (facilitySearchAttempted || ambulanceSearchAttempted) return 'No healthcare or ambulance service was confirmed for this request.'
   return modelResponse || 'The requested information was retrieved.'
 }
 
@@ -79,7 +109,7 @@ async function runPlan({ message, location, onEvent }) {
     return { status: 'location_required', coordinationId, intent, steps: [], result: null, finalResponse }
   }
   emit('planning_started', { coordinationId, message: 'Creating execution plan' })
-  const context = { location: normalizedLocation, facilities: [] }
+  const context = { location: normalizedLocation, facilities: [], ambulances: [] }
   const steps = []
   const results = {}
   let selectedFacility = null
@@ -102,16 +132,29 @@ async function runPlan({ message, location, onEvent }) {
       if (!tool) throw ApiError.badRequest('AI selected an unsupported tool')
       const args = parseArguments(call)
       const execution = await ToolExecution.create({ coordinationId: coordination._id, toolName, status: 'running', input: args, startedAt: new Date() })
-      emit('tool_started', { coordinationId, tool: toolName, message: toolName === 'findFacilities' ? 'Finding nearby healthcare facilities' : 'Calculating fastest route' })
+      const startMsg =
+        toolName === 'findAmbulances'
+          ? 'Finding nearby ambulance services'
+          : toolName === 'findFacilities'
+          ? 'Finding nearby healthcare facilities'
+          : 'Calculating fastest route'
+      emit('tool_started', { coordinationId, tool: toolName, message: startMsg })
       try {
         const output = await tool.execute(args, context)
         const safeOutput = safeToolResult(toolName, output)
         if (toolName === 'findFacilities') context.facilities = output.facilities || []
+        if (toolName === 'findAmbulances') context.ambulances = output.ambulances || []
         if (toolName === 'calculateRoute') selectedFacility = facilityForRoute(args, context)
         results[toolName] = safeOutput
         execution.status = 'completed'; execution.output = safeOutput; execution.completedAt = new Date(); await execution.save()
         steps.push({ tool: toolName, status: 'completed' })
-        emit('tool_completed', { coordinationId, tool: toolName, message: toolName === 'findFacilities' ? 'Healthcare facilities found' : 'Fastest route calculated' })
+        const compMsg =
+          toolName === 'findAmbulances'
+            ? 'Ambulance services found'
+            : toolName === 'findFacilities'
+            ? 'Healthcare facilities found'
+            : 'Fastest route calculated'
+        emit('tool_completed', { coordinationId, tool: toolName, message: compMsg })
         messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(safeOutput) })
       } catch (error) {
         execution.status = 'failed'; execution.error = 'Tool execution failed'; execution.completedAt = new Date(); await execution.save()
@@ -127,14 +170,19 @@ async function runPlan({ message, location, onEvent }) {
     finalResponse = buildGroundedFinalResponse({
       modelResponse: finalResponse,
       facilities: results.findFacilities?.facilities || [],
+      ambulances: results.findAmbulances?.ambulances || [],
       facilitySearchAttempted: Boolean(results.findFacilities),
+      ambulanceSearchAttempted: Boolean(results.findAmbulances),
       selectedFacility,
       route: results.calculateRoute,
     })
     coordination.status = 'completed'
     coordination.steps = steps.map((step) => ({ name: step.tool, status: step.status, description: 'Executed by the approved tool registry', timestamp: new Date() }))
     coordination.toolsUsed = steps.map((step) => ({ toolName: step.tool, status: step.status }))
-    coordination.recommendation = results.findFacilities ? { facilities: results.findFacilities.facilities } : null
+    coordination.recommendation = {
+      facilities: results.findFacilities?.facilities || [],
+      ambulances: results.findAmbulances?.ambulances || [],
+    }
     await coordination.save()
     const data = { status: 'completed', coordinationId, intent, steps, result: results, finalResponse }
     emit('final_response', { coordinationId, response: finalResponse, data })

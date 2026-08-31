@@ -137,6 +137,26 @@ function safeToolResult(name, result) {
         })),
     }
   }
+  if (name === 'findAmbulances') {
+    return {
+      ambulances: (result.ambulances || [])
+        .slice(0, 10)
+        .map(({ id, placeId, name: fname, address, location, types, rating, userRatingsTotal, phone, website, distanceMeters, distanceText }) => ({
+          id,
+          placeId,
+          name: fname,
+          address,
+          location,
+          types,
+          rating,
+          userRatingsTotal,
+          phone,
+          website,
+          distanceMeters,
+          distanceText,
+        })),
+    }
+  }
   if (name === 'calculateRoute') {
     const { distanceMeters, durationSeconds, distanceText, durationText } = result
     return { distanceMeters, durationSeconds, distanceText, durationText }
@@ -152,6 +172,13 @@ const handlers = {
     const radius = validateRadius(params.radius)
     const result = await executeTool(context.coordinationId, 'findFacilities', { serviceType: 'emergency', radius }, context)
     return { facilityType: 'emergency', facilities: result.safeOutput.facilities, radius }
+  },
+
+  find_ambulance: async ({ params, context }) => {
+    const { location } = params
+    const radius = validateRadius(params.radius)
+    const result = await executeTool(context.coordinationId, 'findAmbulances', { radius }, context)
+    return { facilityType: 'ambulance', ambulances: result.safeOutput.ambulances, radius }
   },
 
   find_healthcare_service: async ({ params, context }) => {
@@ -174,7 +201,8 @@ const handlers = {
   },
 
   calculate_route: async ({ params, context }) => {
-    const facility = (context.facilities || []).find(
+    const allTargets = (context.facilities || []).concat(context.ambulances || [])
+    const facility = allTargets.find(
       (item) => item.id === params.facilityId || item.placeId === params.facilityId,
     )
     if (!facility || !facility.location) {
@@ -201,8 +229,8 @@ const handlers = {
 
 function safeFacility(facility) {
   if (!facility) return null
-  const { id, placeId, name, address, location, types, rating, userRatingsTotal } = facility
-  return { id, placeId, name, address, location, types, rating, userRatingsTotal }
+  const { id, placeId, name, address, location, types, rating, userRatingsTotal, phone, website, distanceMeters, distanceText } = facility
+  return { id, placeId, name, address, location, types, rating, userRatingsTotal, phone, website, distanceMeters, distanceText }
 }
 
 // Extract & validate allowed keys per capability. This is the strict
@@ -213,6 +241,7 @@ function decodeParams(name, params) {
   }
   switch (name) {
     case 'find_emergency_facility':
+    case 'find_ambulance':
     case 'find_pharmacy':
     case 'find_blood_bank':
     case 'find_emergency_facility_and_route': {

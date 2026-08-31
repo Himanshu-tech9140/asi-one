@@ -43,6 +43,10 @@ export default function History() {
 
   return (
     <div className="space-y-5">
+      <div>
+        <h2 className="text-xl font-bold text-slate-900">Coordination History</h2>
+        <p className="mt-1 text-sm text-slate-500">Review past healthcare requests, facilities, and routes.</p>
+      </div>
       {/* Controls */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 sm:max-w-sm">
@@ -55,15 +59,15 @@ export default function History() {
             className="w-full rounded-xl border border-white/10 bg-white/[0.03] py-2.5 pl-9 pr-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent/50"
           />
         </div>
-        <div className="flex items-center gap-2">
-          <Filter size={15} className="text-slate-500" />
+        <div className="flex min-w-0 items-center gap-2">
+          <Filter size={15} className="shrink-0 text-slate-500" />
           <div role="group" aria-label="Filter by status" className="flex flex-wrap gap-1">
             {HISTORY_STATUSES.map((s) => (
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
                 aria-pressed={statusFilter === s}
-                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                className={`rounded-lg px-2.5 sm:px-3 py-1.5 text-xs font-medium transition-colors ${
                   statusFilter === s
                     ? 'bg-accent/15 text-accent-soft ring-1 ring-inset ring-accent/30'
                     : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-200'

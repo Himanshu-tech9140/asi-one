@@ -18,6 +18,7 @@ const facilityLimiter = rateLimit({
 })
 
 router.get('/', facilityLimiter, facilityController.getFacilities)
+router.get('/ambulances', facilityLimiter, facilityController.getAmbulances)
 router.get('/:id', facilityLimiter, facilityController.getFacilityById)
 
 module.exports = router

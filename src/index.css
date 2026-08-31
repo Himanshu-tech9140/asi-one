@@ -7,37 +7,32 @@
     @apply antialiased;
   }
   body {
-    @apply bg-base-950 text-slate-200 font-sans;
+    @apply bg-base-950 text-slate-700 font-sans;
+    overflow-x: hidden;
   }
   *:focus-visible {
-    @apply outline-none ring-2 ring-accent/70 ring-offset-2 ring-offset-base-950 rounded;
+    @apply outline-none ring-2 ring-accent/70 ring-offset-2 ring-offset-white rounded;
   }
   ::selection {
-    background: rgba(79, 140, 255, 0.35);
+    background: #FECACA;
   }
 }
 
 @layer components {
-  .glass {
-    @apply bg-base-900/70 backdrop-blur-md border border-white/[0.06];
-  }
-  .card-surface {
-    @apply bg-base-850/80 border border-white/[0.07] rounded-2xl shadow-card;
-  }
+  .glass { @apply bg-white border border-slate-200; }
+  .card-surface { @apply bg-white border border-slate-200 rounded-xl shadow-card; }
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
+    background: #CBD5E1;
     border-radius: 9999px;
   }
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-accent-soft to-violet-400;
-  }
+  .text-gradient { @apply text-accent; }
 }
 
 /* Respect prefers-reduced-motion */
@@ -49,10 +44,23 @@
   }
 }
 
-/* Subtle grid background for hero / map */
+/* Reused dark-first utility classes are normalized for clinical white surfaces. */
+[class~="text-white"], [class~="text-slate-100"], [class~="text-slate-200"] { color: #0F172A !important; }
+[class~="text-slate-300"] { color: #475569 !important; }
+[class~="text-slate-400"], [class~="text-slate-500"], [class~="text-slate-600"] { color: #64748B !important; }
+[class~="border-white/10"], [class~="border-white/[0.07]"], [class~="border-white/[0.06]"], [class~="border-white/[0.04]"], [class~="border-white/[0.05]"] { border-color: #E2E8F0 !important; }
+[class~="bg-white/[0.02]"], [class~="bg-white/[0.03]"], [class~="bg-white/[0.04]"], [class~="bg-white/[0.05]"], [class~="bg-white/[0.06]"] { background-color: #F8FAFC !important; }
+[class~="bg-base-900/60"], [class~="bg-base-850/90"] { background-color: #FFFFFF !important; }
+[class~="hover:bg-white/[0.03]"]:hover, [class~="hover:bg-white/[0.04]"]:hover, [class~="hover:bg-white/[0.05]"]:hover, [class~="hover:bg-white/[0.06]"]:hover { background-color: #F1F5F9 !important; }
+[class~="text-accent-soft"] { color: #B91C1C !important; }
+[class~="bg-accent/10"], [class~="bg-accent/15"], [class~="bg-accent/[0.06]"] { background-color: #FEF2F2 !important; }
+[class~="border-accent/20"], [class~="border-accent/30"], [class~="border-accent/40"], [class~="border-accent/50"] { border-color: #FECACA !important; }
+[class~="shadow-glow"] { box-shadow: 0 2px 8px rgba(15,23,42,.08) !important; }
+
+/* Subtle grid background for map */
 .bg-grid {
   background-image:
-    linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px);
+    linear-gradient(to right, rgba(148,163,184,.16) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148,163,184,.16) 1px, transparent 1px);
   background-size: 32px 32px;
 }

@@ -9,18 +9,18 @@ import {
 } from 'lucide-react'
 
 const ACTION_META = {
-  emergencyFacility: { icon: Building2, accent: 'text-accent-soft bg-accent/10' },
-  healthcareService: { icon: Stethoscope, accent: 'text-amber-300 bg-amber-500/10' },
-  pharmacy: { icon: Pill, accent: 'text-emerald-300 bg-emerald-500/10' },
-  bloodBank: { icon: Droplets, accent: 'text-rose-300 bg-rose-500/10' },
-  fastestRoute: { icon: Route, accent: 'text-violet-300 bg-violet-500/10' },
+  emergencyFacility: { icon: Building2, accent: 'text-red-700 bg-red-50' },
+  healthcareService: { icon: Stethoscope, accent: 'text-red-700 bg-red-50' },
+  pharmacy: { icon: Pill, accent: 'text-green-700 bg-green-50' },
+  bloodBank: { icon: Droplets, accent: 'text-red-700 bg-red-50' },
+  fastestRoute: { icon: Route, accent: 'text-blue-700 bg-blue-50' },
 }
 
 export function QuickActions({ actions, onAction }) {
   return (
     <section aria-label="Quick actions">
       <h2 className="mb-3 text-sm font-semibold tracking-tight text-slate-100">
-        Quick Actions
+        Healthcare services
       </h2>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-5">
         {actions.map((action) => {
@@ -30,7 +30,7 @@ export function QuickActions({ actions, onAction }) {
             <button
               key={action.id}
               onClick={() => onAction?.(action)}
-              className="group flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.02] p-3.5 text-left transition-colors hover:border-accent/30 hover:bg-white/[0.04]"
+              className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 text-left shadow-card transition-colors hover:border-red-200 hover:bg-red-50/40"
             >
               <span
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${meta?.accent || 'bg-accent/10 text-accent-soft'}`}

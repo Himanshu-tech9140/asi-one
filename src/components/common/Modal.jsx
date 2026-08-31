@@ -19,7 +19,7 @@ export function Modal({ open, onClose, title, children, width = 'max-w-lg' }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -30,7 +30,7 @@ export function Modal({ open, onClose, title, children, width = 'max-w-lg' }) {
         aria-hidden="true"
       />
       <div
-        className={`relative w-full ${width} max-h-[85vh] overflow-auto rounded-2xl border border-white/10 bg-base-850 shadow-2xl p-6 animate-fadeUp`}
+        className={`relative w-full ${width} max-h-[90vh] sm:max-h-[85vh] overflow-auto rounded-t-2xl sm:rounded-2xl border border-white/10 bg-base-850 shadow-2xl p-5 sm:p-6 animate-fadeUp`}
       >
         <header className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-100">{title}</h2>

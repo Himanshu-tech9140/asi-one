@@ -17,13 +17,13 @@ export function AgentActivity({ steps, isRunning, isComplete, onReset }) {
 
   return (
     <Card
-      title="Agent Activity"
+      title="ASI:One Coordination Activity"
       subtitle={
         isRunning
           ? `Executing… ${doneCount}/${steps.length} steps`
           : isComplete
             ? `Execution complete · ${steps.length} steps`
-            : 'High-level execution status'
+          : 'Healthcare coordination status'
       }
       action={
         isComplete ? (

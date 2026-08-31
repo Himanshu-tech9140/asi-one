@@ -89,6 +89,12 @@ async function findFacilities({ lat, lng, radius = 10000, serviceType } = {}) {
     })
   }
 
+  // Production must never silently fall back to mock facility data when the
+  // Google Maps API key is not configured. Fail clearly instead.
+  if (env.isProduction) {
+    throw ApiError.internal('Facility search is not configured')
+  }
+
   const radiusM = isFiniteNumber(radius) && radius > 0 ? radius : 10000
   const normalizedType = parseServiceType(serviceType)
 
@@ -124,14 +130,69 @@ async function getFacilityById(id) {
     return mapsService.getPlaceDetails(id.trim())
   }
 
+  // Production must never silently fall back to mock facility data when the
+  // Google Maps API key is not configured. Fail clearly instead.
+  if (env.isProduction) {
+    throw ApiError.internal('Facility search is not configured')
+  }
+
   const facility = mockFacilities.find((item) => item.id === id.trim())
   if (!facility) throw ApiError.notFound('Facility not found')
 
   return normalizeFacility(facility)
 }
 
+async function findAmbulances({ lat, lng, radius = 10000 } = {}) {
+  if (lat !== undefined || lng !== undefined) {
+    validateLatLng(lat, lng)
+  }
+
+  if (env.googleMapsApiKey) {
+    return mapsService.findAmbulances({
+      latitude: lat,
+      longitude: lng,
+      radius,
+    })
+  }
+
+  if (env.isProduction) {
+    throw ApiError.internal('Ambulance search is not configured')
+  }
+
+  const radiusM = isFiniteNumber(radius) && radius > 0 ? radius : 10000
+  let filtered = mockFacilities.filter(
+    (f) =>
+      f.category === 'emergency' ||
+      (f.services && f.services.some((s) => s.toLowerCase().includes('ambulance') || s.toLowerCase().includes('emergency'))),
+  )
+  if (filtered.length === 0) filtered = mockFacilities.slice(0, 3)
+
+  if (lat !== undefined && lng !== undefined) {
+    filtered = filtered
+      .map((facility) => {
+        const distanceKm = haversineKm(lat, lng, facility.location.lat, facility.location.lng)
+        const distMeters = Math.round(distanceKm * 1000)
+        return {
+          ...facility,
+          name: facility.name.includes('Ambulance') ? facility.name : `${facility.name} Ambulance Care`,
+          types: ['ambulance', 'emergency_service'],
+          distanceMeters: distMeters,
+          distance: Number(distanceKm.toFixed(1)),
+          distanceText: distanceKm < 1 ? `${distMeters} m` : `${distanceKm.toFixed(1)} km`,
+          distanceUnit: 'km',
+          estimatedTime: Math.max(3, Math.round(distanceKm * 3.5)),
+          estimatedTimeUnit: 'min',
+        }
+      })
+      .filter((facility) => facility.distance <= radiusM / 1000)
+  }
+
+  return filtered.map(normalizeFacility)
+}
+
 module.exports = {
   findFacilities,
+  findAmbulances,
   getFacilityById,
   searchFacilities: findFacilities,
 }

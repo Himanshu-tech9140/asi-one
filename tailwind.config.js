@@ -7,17 +7,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        base: {
-          950: '#08090c',
-          900: '#0d0f14',
-          850: '#11141b',
-          800: '#161a23',
-          700: '#1c212c',
-        },
-        accent: {
-          DEFAULT: '#4f8cff',
-          soft: '#6ea4ff',
-        },
+        base: { 950: '#F8FAFC', 900: '#FFFFFF', 850: '#FFFFFF', 800: '#F1F5F9', 700: '#E2E8F0' },
+        accent: { DEFAULT: '#DC2626', soft: '#B91C1C' },
+        medical: { navy: '#0F172A', muted: '#64748B', success: '#16A34A', info: '#2563EB' },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
@@ -26,10 +18,7 @@ export default {
       backdropBlur: {
         xs: '2px',
       },
-      boxShadow: {
-        glow: '0 0 24px -6px rgba(79,140,255,0.45)',
-        card: '0 1px 0 0 rgba(255,255,255,0.04) inset, 0 12px 32px -20px rgba(0,0,0,0.8)',
-      },
+      boxShadow: { card: '0 2px 8px rgba(15, 23, 42, 0.05)', soft: '0 8px 24px rgba(15, 23, 42, 0.08)' },
       keyframes: {
         pulseDot: {
           '0%, 100%': { opacity: '1' },
@@ -43,10 +32,15 @@ export default {
           '0%': { opacity: '0', transform: 'translateY(8px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        slideInLeft: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
       },
       animation: {
         pulseDot: 'pulseDot 2s ease-in-out infinite',
         fadeUp: 'fadeUp 0.4s ease-out both',
+        slideInLeft: 'slideInLeft 0.25s ease-out both',
       },
     },
   },

@@ -13,7 +13,7 @@ const NODE_ACCENT = {
   facility: 'from-accent/25 to-transparent text-accent-soft',
   route: 'from-emerald-500/25 to-transparent text-emerald-300',
   search: 'from-amber-500/25 to-transparent text-amber-300',
-  external: 'from-violet-500/25 to-transparent text-violet-300',
+  external: 'from-blue-500/15 to-transparent text-blue-700',
 }
 
 export function AgentNode({ node, dimmed = false }) {
@@ -49,7 +49,7 @@ export function AgentNode({ node, dimmed = false }) {
       </div>
       <p className="mt-2 text-[11px] leading-relaxed text-slate-400">{node.description}</p>
       {isExternal && (
-        <span className="mt-2 rounded bg-violet-500/10 px-2 py-0.5 text-[10px] text-violet-300">
+        <span className="mt-2 rounded bg-blue-50 px-2 py-0.5 text-[10px] text-blue-700">
           Mock · not connected
         </span>
       )}
@@ -65,12 +65,12 @@ export function AgentGraph({ activeId = null }) {
       aria-label="Agent network graph"
     >
       {/* Center agent */}
-      <div className="relative z-10 flex items-center gap-2.5 rounded-2xl border border-accent/40 bg-accent/10 px-5 py-3 shadow-glow">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-violet-500">
+      <div className="relative z-10 flex max-w-full items-center gap-2.5 rounded-2xl border border-accent/40 bg-accent/10 px-4 sm:px-5 py-3 shadow-glow">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent">
           <Activity size={18} className="text-white" />
         </span>
         <div className="text-left leading-tight">
-          <div className="text-sm font-bold text-white">{center.name}</div>
+          <div className="truncate text-sm font-bold text-white">{center.name}</div>
           <div className="text-[11px] text-accent-soft">
             {center.type} · <span className="text-emerald-300">Online</span>
           </div>
@@ -78,7 +78,7 @@ export function AgentGraph({ activeId = null }) {
       </div>
 
       {/* Connectors */}
-      <div className="relative my-4 h-6 w-full" aria-hidden="true">
+      <div className="relative my-4 hidden h-6 w-full sm:block" aria-hidden="true">
         <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none">
           {nodes.map((_, i) => {
             const x = (i + 0.5) / nodes.length * 100

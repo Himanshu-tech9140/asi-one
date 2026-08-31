@@ -24,12 +24,12 @@ function Toggle({ checked, onChange, label }) {
 
 function ToggleRow({ icon: Icon, title, description, checked, onChange, label }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-3">
-      <div className="flex items-start gap-3">
+    <div className="flex items-center justify-between gap-3 py-3">
+      <div className="flex items-start gap-3 min-w-0">
         <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.05] text-accent-soft">
           <Icon size={17} />
         </span>
-        <div>
+        <div className="min-w-0">
           <div className="text-sm font-medium text-slate-100">{title}</div>
           <div className="text-xs text-slate-500">{description}</div>
         </div>
@@ -61,12 +61,12 @@ export default function Settings() {
 
       {/* Appearance */}
       <Card title="Appearance">
-        <div className="flex items-center justify-between gap-4 py-1">
-          <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.05] text-accent-soft">
+        <div className="flex items-center justify-between gap-3 py-1">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.05] text-accent-soft">
               {darkMode ? <Moon size={17} /> : <Sun size={17} />}
             </span>
-            <div>
+            <div className="min-w-0">
               <div className="text-sm font-medium text-slate-100">Dark interface</div>
               <div className="text-xs text-slate-500">Always-on dark theme</div>
             </div>
@@ -100,9 +100,9 @@ export default function Settings() {
       {/* Location preferences */}
       <Card title="Location preferences">
         <div className="divide-y divide-white/[0.05]">
-          <div className="flex items-center justify-between gap-4 py-3">
+          <div className="flex items-start justify-between gap-3 py-3">
             <div className="flex items-start gap-3">
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.05] text-accent-soft">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.05] text-accent-soft">
                 <MapPin size={17} />
               </span>
               <div>
@@ -110,7 +110,7 @@ export default function Settings() {
                 <div className="text-xs text-slate-500">Preferred distance for facility searches</div>
               </div>
             </div>
-            <div className="flex gap-1">
+            <div className="flex flex-wrap justify-end gap-1">
               {radiusOptions.map((r) => (
                 <button
                   key={r}

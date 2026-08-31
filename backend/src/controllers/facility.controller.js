@@ -43,6 +43,37 @@ const getFacilities = asyncHandler(async (req, res) => {
   res.json({ success: true, data: { facilities } })
 })
 
+const getAmbulances = asyncHandler(async (req, res) => {
+  const { lat, lng, radius } = req.query
+
+  const latNum = parseNumber(lat)
+  const lngNum = parseNumber(lng)
+
+  if (lat !== undefined || lng !== undefined) {
+    if (!Number.isFinite(latNum) || latNum < -90 || latNum > 90) {
+      throw ApiError.badRequest('lat must be a valid number between -90 and 90')
+    }
+    if (!Number.isFinite(lngNum) || lngNum < -180 || lngNum > 180) {
+      throw ApiError.badRequest('lng must be a valid number between -180 and 180')
+    }
+  }
+
+  if (radius !== undefined) {
+    const r = parseNumber(radius)
+    if (!Number.isFinite(r) || r <= 0) {
+      throw ApiError.badRequest('radius must be a positive number (metres)')
+    }
+  }
+
+  const ambulances = await facilityService.findAmbulances({
+    lat: latNum,
+    lng: lngNum,
+    radius: radius !== undefined ? parseNumber(radius) : undefined,
+  })
+
+  res.json({ success: true, data: { ambulances } })
+})
+
 const getFacilityById = asyncHandler(async (req, res) => {
   const { id } = req.params
   const facility = await facilityService.getFacilityById(id)
@@ -51,5 +82,6 @@ const getFacilityById = asyncHandler(async (req, res) => {
 
 module.exports = {
   getFacilities,
+  getAmbulances,
   getFacilityById,
 }

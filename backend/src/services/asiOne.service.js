@@ -38,6 +38,7 @@ const SUPPORTED_SERVICE_TYPES = [
   'pharmacy',
   'blood_bank',
   'specialist',
+  'ambulance',
 ]
 
 // Supported intent types.
@@ -94,15 +95,15 @@ const SYSTEM_PROMPT = `You are the intent-understanding component of CrisisFlow,
 Your ONLY job is to classify the user's message into a structured intent. You MUST NOT diagnose diseases, prescribe medication, recommend treatment, claim any emergency is safe, or guarantee facility/service availability.
 
 Map the message to exactly one of these intents:
-- find_facility: the user wants to find a healthcare facility (hospital, clinic, pharmacy, blood bank, specialist, etc.)
-- find_route: the user wants travel/direction information to a facility
+- find_facility: the user wants to find a healthcare facility or ambulance service (hospital, clinic, pharmacy, blood bank, ambulance, specialist, etc.)
+- find_route: the user wants travel/direction information to a facility or ambulance
 - healthcare_search: the user wants broader healthcare-related information or searches
 - emergency_help: the user describes an emergency and needs urgent care directions
 - general_healthcare_query: a general question about healthcare (not a facility/route request)
 - unsupported: anything not related to healthcare coordination
 
 Map the facility type (when relevant) to exactly one of these service types:
-- emergency, hospital, clinic, pharmacy, blood_bank, specialist
+- emergency, hospital, clinic, pharmacy, blood_bank, specialist, ambulance
 Use null when the message does not refer to a specific facility type.
 
 Set needsRoute to true when the user asks for directions, travel time, distance, or how to reach a facility.

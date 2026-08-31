@@ -9,7 +9,7 @@ export default function AgentNetwork() {
     <div className="space-y-5">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">Agent Network</h1>
-        <p className="mt-1 text-sm text-slate-400">Capabilities available to CrisisFlow</p>
+        <p className="mt-1 text-sm text-slate-400">Healthcare coordination capabilities available to ASI:One</p>
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">

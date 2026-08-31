@@ -8,7 +8,9 @@ import { RecommendationCard } from '../components/dashboard/RecommendationCard'
 import { FacilityCard } from '../components/dashboard/FacilityCard'
 import { QuickActions } from '../components/dashboard/QuickActions'
 import { AgentNetworkPreview } from '../components/dashboard/AgentNetworkPreview'
+import { LiveNavigationPanel } from '../components/dashboard/LiveNavigationPanel'
 import { useAgentSimulation } from '../hooks/useAgentSimulation'
+import { useLiveNavigation } from '../hooks/useLiveNavigation'
 import { FACILITIES, QUICK_ACTIONS } from '../data/mockData'
 import { Badge } from '../components/common/Badge'
 
@@ -16,6 +18,7 @@ export default function Dashboard() {
   const [input, setInput] = useState('')
   const [location, setLocation] = useState(null)
   const simulation = useAgentSimulation()
+  const liveNav = useLiveNavigation()
   const navigate = useNavigate()
 
   const startCoordination = () => {
@@ -26,6 +29,7 @@ export default function Dashboard() {
   const onQuickAction = (action) => {
     const request =
       {
+        smartAmbulance: 'Find the nearest emergency ambulance service and contact details',
         emergencyFacility: 'Find an emergency facility near my current location',
         healthcareService: 'Find a healthcare service near my current location',
         pharmacy: 'Find a pharmacy near my current location',
@@ -49,19 +53,17 @@ export default function Dashboard() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
           </span>
-          <span className="text-xs font-semibold uppercase tracking-widest text-emerald-300">
-            AI Agent Online
+          <span className="text-xs font-semibold uppercase tracking-widest text-green-700">
+            ASI:One coordination online
           </span>
         </div>
 
         <div className="max-w-3xl">
-          <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-            What do you need help <span className="text-gradient">coordinating?</span>
+          <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
+            How can we help you <span className="text-gradient">today?</span>
           </h1>
           <p className="mt-2 text-sm text-slate-400 sm:text-base">
-            Describe your situation in natural language. CrisisFlow will understand the goal,
-            plan the required steps, and coordinate available tools to produce an actionable
-            result.
+            Describe your healthcare need and ASI:One will coordinate the right services for you.
           </p>
         </div>
       </section>
@@ -74,6 +76,22 @@ export default function Dashboard() {
         onUseLocation={() => setLocation('Sector 62')}
         running={simulation.isRunning}
       />
+
+      {/* Live Navigation HUD if active */}
+      {liveNav.isNavigating && (
+        <LiveNavigationPanel
+          destination={liveNav.destination || recommended}
+          currentLocation={liveNav.currentLocation}
+          distanceText={liveNav.liveDistanceText}
+          durationText={liveNav.liveDurationText}
+          statusMessage={liveNav.statusMessage}
+          isArrived={liveNav.isArrived}
+          isRecalculating={liveNav.isRecalculating}
+          error={liveNav.error}
+          onStop={liveNav.stopNavigation}
+          onRecalculate={liveNav.recalculateRouteNow}
+        />
+      )}
 
       {/* Main 3-column agent area */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
@@ -97,20 +115,33 @@ export default function Dashboard() {
               <span className="text-xs text-slate-500">— user location resolved</span>
             </div>
           )}
-          <MockMap showRoute={simulation.isComplete || simulation.isRunning} />
+          <MockMap
+            showRoute={simulation.isComplete || simulation.isRunning || liveNav.isNavigating}
+            selectedFacility={liveNav.destination || recommended}
+            facilities={FACILITIES}
+            userLocation={liveNav.currentLocation}
+            route={liveNav.route}
+            routePoints={liveNav.routePoints}
+            isLiveNavigating={liveNav.isNavigating}
+          />
         </div>
       </div>
 
       {/* Recommendation + alternatives */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <div className="lg:col-span-1">
-          <RecommendationCard facility={simulation.isComplete ? recommended : null} empty={!simulation.isComplete} />
+          <RecommendationCard
+            facility={simulation.isComplete ? recommended : null}
+            empty={!simulation.isComplete}
+            onLiveNavigation={() => liveNav.startNavigation(recommended, { lat: 51.505, lng: -0.055 })}
+            isNavigating={liveNav.isNavigating}
+          />
         </div>
         <div className="lg:col-span-2">
           <section aria-label="Alternative facilities">
-            <div className="mb-3 flex items-center justify-between">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-sm font-semibold tracking-tight text-slate-100">
-                Alternative Facilities
+                Nearby healthcare facilities
               </h2>
               <span className="text-xs text-slate-400">
                 {simulation.isComplete ? `${alternatives.length} near you` : 'Run a coordination to see results'}
@@ -144,11 +175,11 @@ export default function Dashboard() {
           <AgentNetworkPreview />
         </div>
         <div className="lg:col-span-1">
-          <div className="card-surface flex h-full flex-col justify-between p-5">
+          <div className="rounded-xl border border-red-200 bg-red-50 p-5">
             <div>
               <div className="flex items-center gap-2 text-sm font-semibold text-slate-100">
                 <ShieldCheck size={16} className="text-emerald-400" />
-                Preparedness
+                Emergency assistance
               </div>
               <p className="mt-2 text-xs leading-relaxed text-slate-400">
                 CrisisFlow plans before acting. Every request moves from goal → plan → action →

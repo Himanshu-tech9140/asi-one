@@ -1,4 +1,7 @@
-const baseUrl = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '')
+const baseUrl = (
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) ||
+  '/api'
+).replace(/\/$/, '')
 
 export class ApiClientError extends Error {
   constructor(message, status) {
@@ -39,6 +42,11 @@ export const api = {
     return request(`/facilities?${query.toString()}`)
   },
   facility: (id) => request(`/facilities/${encodeURIComponent(id)}`),
+  ambulances: ({ lat, lng, radius }) => {
+    const query = new URLSearchParams({ lat: String(lat), lng: String(lng) })
+    if (radius) query.set('radius', String(radius))
+    return request(`/facilities/ambulances?${query.toString()}`)
+  },
   calculateRoute: (origin, destination) =>
     request('/routes/calculate', { method: 'POST', body: JSON.stringify({ origin, destination }) }),
   plan: (message, location) =>
@@ -69,12 +77,37 @@ export function streamPlan(message, location, { onEvent, onError } = {}) {
 }
 
 export function normalizeFacility(facility, index = 0) {
+  const isAmb = facility.types?.includes('ambulance') || facility.name?.toLowerCase().includes('ambulance')
   return {
     ...facility,
-    status: index === 0 ? 'Recommended' : 'Alternative',
+    isAmbulance: isAmb,
+    status: index === 0 ? (isAmb ? 'Nearest Ambulance Service' : 'Recommended') : 'Alternative',
     match: facility.rating ? Math.round(facility.rating * 20) : null,
-    service: Array.isArray(facility.types) ? facility.types[0]?.replaceAll('_', ' ') || 'Healthcare service' : 'Healthcare service',
+    service: Array.isArray(facility.types)
+      ? facility.types[0]?.replaceAll('_', ' ') || (isAmb ? 'Ambulance service' : 'Healthcare service')
+      : (isAmb ? 'Ambulance service' : 'Healthcare service'),
     open: facility.rating ? `Rating ${facility.rating}` : 'Rating not available',
-    decisionFactors: ['Returned by the healthcare facility search', 'Location and availability data may change'],
+    decisionFactors: [
+      isAmb ? 'Verified ambulance service provider' : 'Returned by the healthcare facility search',
+      facility.phone ? `Direct contact: ${facility.phone}` : 'Location and availability data may change',
+    ],
+  }
+}
+
+export function normalizeAmbulance(ambulance, index = 0) {
+  const isNearest = index === 0
+  return {
+    ...ambulance,
+    isAmbulance: true,
+    isNearest,
+    status: isNearest ? 'Nearest Ambulance Service' : 'Alternative Service',
+    match: ambulance.rating ? Math.round(ambulance.rating * 20) : null,
+    service: 'Emergency Ambulance & Medical Transport',
+    open: ambulance.rating ? `Rating ${ambulance.rating}` : 'Rating not available',
+    decisionFactors: [
+      isNearest ? 'Closest verified ambulance provider' : 'Verified ambulance service provider',
+      ambulance.phone ? `Direct contact available (${ambulance.phone})` : 'Location verified via Google Places',
+      'Real-time transit route available',
+    ],
   }
 }
