@@ -286,6 +286,12 @@ npm test
 The suite runs service, agent, ACP, and SSE streaming tests using `mongodb-memory-server` and stubbed external providers — no real API quota is consumed. Includes coverage for valid/invalid requests, unknown capabilities, planner/tool failures, arbitrary-tool rejection, input validation, and secret protection.
 
 ---
+snapshots
+<img width="1904" height="862" alt="Screenshot 2026-08-31 165551" src="https://github.com/user-attachments/assets/828bcf94-06bd-431d-9da9-850dc51abadb" />
+<img width="1907" height="867" alt="Screenshot 2026-08-31 165616" src="https://github.com/user-attachments/assets/60f3df70-ab7d-45dd-8f05-8a240e228a2c" />
+
+
+<img width="1905" height="856" alt="Screenshot 2026-08-31 165452" src="https://github.com/user-attachments/assets/118cedf6-df0f-4edd-9c6e-71754d5d9d50" />
 
 ## Security
 
