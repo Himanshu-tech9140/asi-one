@@ -17,9 +17,9 @@
 
 ---
 
-**ASI:One** ek AI-powered healthcare emergency coordination system hai jo natural language mein user requests ko real actionable plans mein convert karta hai — **hospitals, ambulances, blood banks, pharmacies** sab kuch ek jagah.
+**ASI:One** is an AI-powered healthcare emergency coordination system that converts natural-language user requests into real, actionable plans — **hospitals, ambulances, blood banks, and pharmacies** all in one place.
 
-> 🎯 **"Mujhe nazdeek emergency hospital dikhao"** — bas itna bolna hai, baaki **ASI:One** sambhal lega.
+> 🎯 **"Find the nearest emergency hospital near me"** — just say it, **ASI:One** handles the rest.
 
 [Live Demo](#getting-started) · [Report Bug](https://github.com/Himanshu-tech9140/asi-one/issues) · [Request Feature](https://github.com/Himanshu-tech9140/asi-one/issues)
 
