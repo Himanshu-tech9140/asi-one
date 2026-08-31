@@ -203,9 +203,6 @@ async function runPlan({ message, location, onEvent }) {
         throw error
       }
     }
-    if (!finalResponse) {
-      finalResponse = 'The requested information was retrieved.'
-    }
     finalResponse = buildGroundedFinalResponse({
       modelResponse: finalResponse,
       facilities: results.findFacilities?.facilities || [],
