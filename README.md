@@ -4,17 +4,6 @@
 
 ### *AI-Powered Healthcare Emergency Coordination System*
 
-[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://reactjs.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-20-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Express](https://img.shields.io/badge/Express-4-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-8-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![ASI:One](https://img.shields.io/badge/ASI-One-FF6B35?style=for-the-badge&logo=bot&logoColor=white)](https://www.asi1.ai/)
-[![Google Maps](https://img.shields.io/badge/Google-Maps-4285F4?style=for-the-badge&logo=google-maps&logoColor=white)](https://mapsplatform.google.com/)
-[![Tailwind](https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](#)
-[![PRs](https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge)](#)
-
 ---
 
 **ASI:One** is an AI-powered healthcare emergency coordination system that converts natural-language user requests into real, actionable plans — **hospitals, ambulances, blood banks, and pharmacies** all in one place.
